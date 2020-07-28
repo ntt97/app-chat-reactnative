@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "795356596872",
+    "firebase_url": "https://chat-group-f94c6.firebaseio.com",
+    "project_id": "chat-group-f94c6",
+    "storage_bucket": "chat-group-f94c6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795356596872:android:c512ecfc47e538d8f6ad3d",
+        "android_client_info": {
+          "package_name": "com.chatgroup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "795356596872-782050s6pqr9vpalgqs246aqpdi7gm57.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBoqLxjwAX8vnZhrm8gwZidNdahzvknAyQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "795356596872-782050s6pqr9vpalgqs246aqpdi7gm57.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
