@@ -4,9 +4,8 @@ import moment from 'moment'
 
 export const ChatLineHolder = (props) => {
   const { item, currentPeerUser, style } = props;
-
   return (
-    <View style={{}}>
+    <View style={{ marginVertical: 8 }}>
       {currentPeerUser ? (<View style={styles.itemLeft}>
         <Image
           style={styles.tinyLogo}
@@ -15,19 +14,20 @@ export const ChatLineHolder = (props) => {
           }}
         />
       </View>) : (<View></View>)}
-      <View style={[styles.content,
-        style,
-      {
-        marginLeft: !currentPeerUser ? 5 : 40,
-        backgroundColor: currentPeerUser ? '#F1F1F1' : '#005ce6',
-
-      }
-      ]} >
-        {/* {!sender ? <View></View> : <Text style={{ color: '#005ce6', marginBottom: 5 }} >{sender}</Text>} */}
-
+      {item?.type!==2?(<View 
+        style={[styles.content,
+              style,
+              {
+                marginLeft: !currentPeerUser ? 5 : 40,
+                backgroundColor: currentPeerUser ? '#F1F1F1' : '#005ce6',
+              }
+              ]} >
+              {/* {!sender ? <View></View> : <Text style={{ color: '#005ce6', marginBottom: 5 }} >{sender}</Text>} */}
         <Text style={{ color: currentPeerUser ? '#000' : '#ffffff', fontSize: 18 }}>{item.content}</Text>
-      </View>
-    <Text style={{position:'absolute',bottom:-5,right:10,fontSize:10,}}>{moment(Number(item.time)).format('ll')}</Text>
+      </View>)
+      :(<Image style={{ width: '70%', aspectRatio: 2,marginBottom:10}} source={{uri:item.content}} />)}
+      
+      <Text style={{ position: 'absolute', bottom: -5, right: 10, fontSize: 10 }}>{moment(Number(item.time)).format('ll')}</Text>
     </View>
 
   );
@@ -46,7 +46,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: -2
-
   },
 
   tinyLogo: {

@@ -15,8 +15,7 @@ const Stack = createStackNavigator();
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        
+      <Stack.Navigator>        
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
         <Stack.Screen name="Chat" component={ChatScreen} />
