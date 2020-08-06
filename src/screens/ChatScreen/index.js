@@ -55,6 +55,7 @@ function ChatScreen({navigation, route}) {
       });
   };
   useEffect(() => {
+    
     if (route.params?.user && route.params?.item) {
       currentPeerUser = route.params?.item;
       currentUser = route.params?.user;
@@ -67,7 +68,7 @@ function ChatScreen({navigation, route}) {
       setChatData([]);
     };
   }, [route.params?.item?.key]);
-  const _sendMessage = () => {
+  const _sendMessage = async () => {
     if (chatInputContent.trim() === '') {
       return;
     }
@@ -79,9 +80,16 @@ function ChatScreen({navigation, route}) {
       content: chatInputContent.trim(),
       type: 1,
     };
-
-    database().ref(`/messages/${groupChatId}/${timestamp}`).set(itemMessage);
-    setChatInputContent('');
+    try {
+      await database()
+        .ref(`/messages/${groupChatId}/${timestamp}`)
+        .set(itemMessage);
+      setChatInputContent('');
+    } catch (error) {
+      console.log('===========================================')
+      console.log(error);
+      console.log('===========================================')
+    }
   };
 
   const _renderChatLine = (item) => {

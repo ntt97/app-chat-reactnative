@@ -1,4 +1,4 @@
-import React, {useState, Children} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import moment from 'moment';
 
 import Modal from '../Modal';
+//define value for image
 let imageHeight = 0;
 let children = null;
 
@@ -19,27 +20,25 @@ export const ChatLineHolder = (props) => {
 
   const onShowImage = async (url) => {
     try {
+      //get width and height image
       await Image.getSize(url, (widthImg, heightImg) => {
-        // calculate image width and height
         const screenWidth = Dimensions.get('window').width;
         const scaleFactor = widthImg / screenWidth;
         imageHeight = heightImg / scaleFactor;
+        // render Image detail
         children = (
           <Image
             style={{width: Dimensions.get('window').width, height: imageHeight}}
             source={{uri: url}}
           />
         );
+        // show modal
         setModalVisible(true);
       });
-    
     } catch (error) {
-      console.log('===========================================')
       console.log(error);
-      console.log('===========================================')
     }
-  }
-    
+  };
 
   return (
     <View style={styles.container}>
@@ -67,7 +66,7 @@ export const ChatLineHolder = (props) => {
               marginLeft: !currentPeerUser ? 5 : 40,
               backgroundColor: currentPeerUser ? '#F1F1F1' : '#005ce6',
             },
-          ]}>          
+          ]}>
           <Text
             style={{color: currentPeerUser ? '#000' : '#ffffff', fontSize: 18}}>
             {item.content}

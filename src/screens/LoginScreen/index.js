@@ -1,7 +1,10 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, TextInput} from 'react-native';
+import {View, Text, TouchableOpacity, TextInput, ActivityIndicator} from 'react-native';
 import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
+
+
+
 function LoginScreen({navigation}) {
   const [name, setName] = useState('');
   const _onChangeName = (text) => {
@@ -53,6 +56,7 @@ function LoginScreen({navigation}) {
         padding: 10,
         paddingBottom: 15,
       }}>
+       
       <Text>ENTER YOUR NAME :</Text>
       <TextInput
         placeholder=""
@@ -66,8 +70,10 @@ function LoginScreen({navigation}) {
         }}
         onChangeText={(text) => _onChangeName(text)}
       />
+      
       <TouchableOpacity onPress={() => _toChatRoom()}>
-        <Text style={{fontWeight: 'bold'}}>Join Now</Text>
+        <Text style={{fontWeight: 'bold'}}>Join Now</Text>      
+
       </TouchableOpacity>
     </View>
   );
