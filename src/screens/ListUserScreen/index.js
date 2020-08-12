@@ -8,39 +8,43 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import database from '@react-native-firebase/database';
 import AsyncStorage from '@react-native-community/async-storage';
+import firestore from '@react-native-firebase/firestore';
+
+import * as APP_STRING from '../../const';
 
 function ListUserScreen({navigation}) {
   const [listUser, setListUser] = useState([]);
-  const [user, setUser] = useState({});
   const [keySearch, setKeySearch] = useState('');
 
   useEffect(() => {
-    AsyncStorage.getItem('@user')
-      .then((res) => {
-        setUser(JSON.parse(res));
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-    const onChildAdd = database()
-      .ref('/users')
-      .on('value', (snapshot) => {
-        if (snapshot.val() !== undefined && snapshot.val() !== null) {
-          const result = Object.keys(snapshot.val()).map((key) => {
-            return {key, ...snapshot.val()[key]};
-          });
-          setListUser([...result]);
-        }
-      });
-    return () => {
-      database().ref(`/users`).off('value', onChildAdd);
-    };
+    getListUser();
+    
   }, []);
+  
 
-  const onHandlePress = (item) => {
-    navigation.navigate('Chat', {user: user, item: item});
+  const getListUser = async () => {
+    let result = [];
+    const data = await firestore().collection(APP_STRING.NODE_USERS).get();
+    if (data.docs.length > 0) {
+      data.docs.forEach((documentSnapshot) => {
+        result.push({...documentSnapshot.data(), key: documentSnapshot.id});
+      });
+    }
+    setListUser(result);
+  };
+  const onHandlePress = async (item) => {
+    const user = await AsyncStorage.getItem(APP_STRING.NODE_USER_LOCAL);       
+    firestore()
+        .collection('users')
+        .doc(JSON.parse(user).key)
+        .update({
+          chattingWith:item.key
+        })
+        .then(() => {
+          console.log('User updated!');
+        });
+    navigation.navigate('Chat', {user: JSON.parse(user), item: item});
   };
 
   const renderItem = ({item}) => (
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    marginLeft:10
   },
   itemLeft: {
     width: 80,
@@ -109,13 +113,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   itemRight: {
+    height:"100%",
     display: 'flex',
     flex: 5,
     marginLeft: 30,
+    borderBottomWidth:1,
+    justifyContent:'center',
+    borderColor:'gray'
   },
   txtName: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: '#040404',
   },
   tinyLogo: {

@@ -7,19 +7,21 @@ import {
   TextInput,
   Image,
 } from 'react-native';
-import database from '@react-native-firebase/database';
+import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {ChatLineHolder} from '../../components/ChatLineHoler';
 import moment from 'moment';
 import ImagePicker from 'react-native-image-crop-picker';
+import * as APP_STRING from '../../const/index';
 
 import iconSend from '../../img/send@32.png';
 import iconUpload from '../../img/upload@32.png';
+
 let currentPeerUser = null;
 let currentUser = null;
 let groupChatId = null;
-let removeListener = null;
-
+let subscriber = null;
+let listMessage = [];
 function ChatScreen({navigation, route}) {
   const [chatData, setChatData] = useState([]);
   const [chatInputContent, setChatInputContent] = useState('');
@@ -43,19 +45,22 @@ function ChatScreen({navigation, route}) {
     } else {
       groupChatId = `${currentPeerUser.key}-${currentUser.key}`;
     }
-    removeListener = database()
-      .ref(`/messages/${groupChatId}`)
-      .on('value', (snapshot) => {
-        if (snapshot.val() !== undefined && snapshot.val() !== null) {
-          let temp = Object.values(snapshot.val()).sort((a, b) => {
-            return b.time - a.time;
-          });
-          setChatData(temp);
-        }
+
+    subscriber = firestore()
+      .collection(APP_STRING.NODE_MSG)
+      .doc(groupChatId)
+      .collection(groupChatId)
+      .orderBy('time', 'asc')
+      .onSnapshot((documentSnapshot) => {
+        documentSnapshot.docChanges().forEach((change) => {
+          listMessage.unshift(change.doc.data());
+        });
+        setChatData(listMessage);
+      
       });
   };
+
   useEffect(() => {
-    
     if (route.params?.user && route.params?.item) {
       currentPeerUser = route.params?.item;
       currentUser = route.params?.user;
@@ -64,10 +69,21 @@ function ChatScreen({navigation, route}) {
     }
 
     return () => {
-      database().ref(`/messages/${groupChatId}`).off('value', removeListener);
-      setChatData([]);
+      listMessage=[];
+      subscriber();
+      firestore()
+        .collection('users')
+        .doc(currentUser.key)
+        .update({
+          chattingWith:""
+        })
+        .then(() => {
+          console.log('User updated!');
+        });
+      
     };
   }, [route.params?.item?.key]);
+
   const _sendMessage = async () => {
     if (chatInputContent.trim() === '') {
       return;
@@ -81,15 +97,16 @@ function ChatScreen({navigation, route}) {
       type: 1,
     };
     try {
-      await database()
-        .ref(`/messages/${groupChatId}/${timestamp}`)
+      await firestore()
+        .collection(APP_STRING.NODE_MSG)
+        .doc(groupChatId)
+        .collection(groupChatId)
+        .doc(timestamp)
         .set(itemMessage);
-      setChatInputContent('');
     } catch (error) {
-      console.log('===========================================')
       console.log(error);
-      console.log('===========================================')
     }
+    setChatInputContent('');
   };
 
   const _renderChatLine = (item) => {
@@ -106,6 +123,7 @@ function ChatScreen({navigation, route}) {
       </View>
     );
   };
+
   const openPickerImage = () => {
     ImagePicker.openPicker({
       width: 300,
@@ -115,8 +133,11 @@ function ChatScreen({navigation, route}) {
       .then((image) => {
         uploadFile(image);
       })
-      .catch((e) => {});
+      .catch((e) => {
+        console.log(e);
+      });
   };
+
   const uploadFile = async (image) => {
     const timestamp = moment().valueOf().toString();
     if (image) {
@@ -132,8 +153,12 @@ function ChatScreen({navigation, route}) {
           content: url,
           type: 2,
         };
-        database()
-          .ref(`/messages/${groupChatId}/${timestamp}`)
+
+        await firestore()
+          .collection(APP_STRING.NODE_MSG)
+          .doc(groupChatId)
+          .collection(groupChatId)
+          .doc(timestamp)
           .set(itemMessage);
       } catch (error) {
         console.log(error);
@@ -156,7 +181,7 @@ function ChatScreen({navigation, route}) {
         <FlatList
           style={{padding: 10}}
           data={chatData}
-          keyExtractor={(item, index) => item.time.toString()}
+          keyExtractor={(item) => item.time.toString()}
           renderItem={({item}) => _renderChatLine(item)}
           inverted
         />

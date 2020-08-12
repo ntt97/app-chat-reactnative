@@ -22,15 +22,11 @@ export const ChatLineHolder = (props) => {
     try {
       //get width and height image
       await Image.getSize(url, (widthImg, heightImg) => {
-        const screenWidth = Dimensions.get('window').width;
-        const scaleFactor = widthImg / screenWidth;
+        const scaleFactor = widthImg / W;
         imageHeight = heightImg / scaleFactor;
         // render Image detail
         children = (
-          <Image
-            style={{width: Dimensions.get('window').width, height: imageHeight}}
-            source={{uri: url}}
-          />
+          <Image style={{width: W, height: imageHeight}} source={{uri: url}} />
         );
         // show modal
         setModalVisible(true);
@@ -75,7 +71,7 @@ export const ChatLineHolder = (props) => {
       ) : (
         <TouchableOpacity onPress={() => onShowImage(item.content)}>
           <Image
-            style={{width: '70%', aspectRatio: 2, marginBottom: 10}}
+            style={{width: W*0.6, height: H*0.15, aspectRatio: 2, marginTop: 5, marginBottom:10}}
             source={{uri: item.content}}
           />
         </TouchableOpacity>
@@ -87,6 +83,8 @@ export const ChatLineHolder = (props) => {
     </View>
   );
 };
+const W = Dimensions.get('window').width;
+const H = Dimensions.get('window').height;
 const styles = StyleSheet.create({
   container: {
     marginVertical: 8,
@@ -111,7 +109,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexDirection: 'column',
-    width: '50%',
+    width: '70%',
     alignItems: 'flex-start',
     padding: 8,
     borderRadius: 8,
