@@ -21,7 +21,7 @@ let currentPeerUser = null;
 let currentUser = null;
 let groupChatId = null;
 let subscriber = null;
-let listMessage = [];
+let lastMsg =null;
 function ChatScreen({navigation, route}) {
   const [chatData, setChatData] = useState([]);
   const [chatInputContent, setChatInputContent] = useState('');
@@ -39,48 +39,63 @@ function ChatScreen({navigation, route}) {
     setChatInputContent(text);
   };
 
-  const getListHistory = () => {
-    if (hashString(currentUser.key) <= hashString(currentPeerUser.key)) {
-      groupChatId = `${currentUser.key}-${currentPeerUser.key}`;
-    } else {
-      groupChatId = `${currentPeerUser.key}-${currentUser.key}`;
-    }
+  const getListHistory = async () => {
+    // firestore()    
+    // .collection(APP_STRING.NODE_MSG)
+    // .doc(groupChatId)
+    // .collection(groupChatId)
+    // .doc(lastMsg.time)
+    // .update({isSeen:1})
 
-    subscriber = firestore()
+    let listMessage = [];
+    subscriber = firestore()    
       .collection(APP_STRING.NODE_MSG)
       .doc(groupChatId)
       .collection(groupChatId)
       .orderBy('time', 'asc')
+      .limitToLast(10)      
       .onSnapshot((documentSnapshot) => {
-        documentSnapshot.docChanges().forEach((change) => {
-          listMessage.unshift(change.doc.data());
+        documentSnapshot.forEach((change) => {
+          if(change.data().idTo===currentUser.key&&change.data()?.isSeen===0){
+            change.ref.update({isSeen:1})
+          }         
+          listMessage.unshift(change.data());
+          
         });
+          
         setChatData(listMessage);
-      
+        listMessage = [];
       });
+     
   };
 
   useEffect(() => {
-    if (route.params?.user && route.params?.item) {
+    if (route.params?.user && route.params?.item) {      
       currentPeerUser = route.params?.item;
       currentUser = route.params?.user;
+      lastMsg = route.params.lastMsg;
+      if (hashString(currentUser.key) <= hashString(currentPeerUser.key)) {
+        groupChatId = `${currentUser.key}-${currentPeerUser.key}`;
+      } else {
+        groupChatId = `${currentPeerUser.key}-${currentUser.key}`;
+      }
+     
       getListHistory();
       navigation.setOptions({title: currentPeerUser.nickName});
     }
 
     return () => {
-      listMessage=[];
+   
       subscriber();
       firestore()
         .collection('users')
         .doc(currentUser.key)
         .update({
-          chattingWith:""
+          chattingWith: '',
         })
         .then(() => {
           console.log('User updated!');
         });
-      
     };
   }, [route.params?.item?.key]);
 
@@ -95,6 +110,7 @@ function ChatScreen({navigation, route}) {
       time: timestamp,
       content: chatInputContent.trim(),
       type: 1,
+      isSeen: 0,
     };
     try {
       await firestore()
@@ -152,6 +168,7 @@ function ChatScreen({navigation, route}) {
           time: timestamp,
           content: url,
           type: 2,
+          isSeen: 0,
         };
 
         await firestore()

@@ -23,6 +23,7 @@ function Main({navigation}) {
   }
 
   useEffect(() => {
+    
     requestUserPermission();
     fcmService.registerAppWithFCM();
     fcmService.register(onRegister, onNotification, onOpenNotification);
@@ -39,6 +40,7 @@ function Main({navigation}) {
         .update({
           id: key,
           pushToken: token,
+          isOnline:1
         })
         .then(() => {
           console.log('User updated!');
@@ -76,6 +78,7 @@ function Main({navigation}) {
   }, []);
 
   const handleAppStateChange = async (params) => {
+   
     if (params === 'background') {
       const user = await AsyncStorage.getItem('@user');
       const {key} = JSON.parse(user);
