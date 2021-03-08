@@ -6,6 +6,7 @@ import {
   FlatList,
   TextInput,
   Image,
+  Button,
 } from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -21,7 +22,7 @@ let currentPeerUser = null;
 let currentUser = null;
 let groupChatId = null;
 let subscriber = null;
-let lastMsg =null;
+let lastMsg = null;
 function ChatScreen({navigation, route}) {
   const [chatData, setChatData] = useState([]);
   const [chatInputContent, setChatInputContent] = useState('');
@@ -40,7 +41,7 @@ function ChatScreen({navigation, route}) {
   };
 
   const getListHistory = async () => {
-    // firestore()    
+    // firestore()
     // .collection(APP_STRING.NODE_MSG)
     // .doc(groupChatId)
     // .collection(groupChatId)
@@ -48,48 +49,64 @@ function ChatScreen({navigation, route}) {
     // .update({isSeen:1})
 
     let listMessage = [];
-    subscriber = firestore()    
+    subscriber = firestore()
       .collection(APP_STRING.NODE_MSG)
       .doc(groupChatId)
       .collection(groupChatId)
       .orderBy('time', 'asc')
-      .limitToLast(10)      
+      .limitToLast(10)
       .onSnapshot((documentSnapshot) => {
         documentSnapshot.forEach((change) => {
-          if(change.data().idTo===currentUser.key&&change.data()?.isSeen===0){
-            change.ref.update({isSeen:1})
-          }         
+          if (
+            change.data().idTo === currentUser.key &&
+            change.data()?.isSeen === 0
+          ) {
+            change.ref.update({isSeen: 1});
+          }
           listMessage.unshift(change.data());
-          
         });
-          
+
         setChatData(listMessage);
         listMessage = [];
       });
-     
   };
 
   useEffect(() => {
-    if (route.params?.user && route.params?.item) {      
+    if (route.params?.user && route.params?.item) {
       currentPeerUser = route.params?.item;
       currentUser = route.params?.user;
       lastMsg = route.params.lastMsg;
-      if (hashString(currentUser.key) <= hashString(currentPeerUser.key)) {
-        groupChatId = `${currentUser.key}-${currentPeerUser.key}`;
+      if (hashString(currentUser?.key) <= hashString(currentPeerUser?.key)) {
+        groupChatId = `${currentUser?.key}-${currentPeerUser?.key}`;
       } else {
-        groupChatId = `${currentPeerUser.key}-${currentUser.key}`;
+        groupChatId = `${currentPeerUser?.key}-${currentUser?.key}`;
       }
-     
+
       getListHistory();
-      navigation.setOptions({title: currentPeerUser.nickName});
+      navigation.setOptions({
+        title: currentPeerUser?.nickName,
+        headerRight: () => (
+          <View style={{flexDirection: 'row'}}>
+            <Button
+              onPress={() => alert('This is a button!')}
+              title="Call"
+              color="blue"
+            />
+            <Button
+              onPress={() => alert('This is a button!')}
+              title="Call Video"
+              color="blue"
+            />
+          </View>
+        ),
+      });
     }
 
     return () => {
-   
       subscriber();
       firestore()
         .collection('users')
-        .doc(currentUser.key)
+        .doc(currentUser?.key)
         .update({
           chattingWith: '',
         })
@@ -105,7 +122,7 @@ function ChatScreen({navigation, route}) {
     }
     const timestamp = moment().valueOf().toString();
     const itemMessage = {
-      idSend: currentUser.key,
+      idSend: currentUser?.key,
       idTo: currentPeerUser.key,
       time: timestamp,
       content: chatInputContent.trim(),
@@ -126,7 +143,7 @@ function ChatScreen({navigation, route}) {
   };
 
   const _renderChatLine = (item) => {
-    if (item.idSend === currentUser.key) {
+    if (item.idSend === currentUser?.key) {
       return (
         <View style={{alignItems: 'flex-end'}}>
           <ChatLineHolder item={item} />
@@ -163,8 +180,8 @@ function ChatScreen({navigation, route}) {
         const url = await reference.getDownloadURL();
 
         const itemMessage = {
-          idSend: currentUser.key,
-          idTo: currentPeerUser.key,
+          idSend: currentUser?.key,
+          idTo: currentPeerUser?.key,
           time: timestamp,
           content: url,
           type: 2,

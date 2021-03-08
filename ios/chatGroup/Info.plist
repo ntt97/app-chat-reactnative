@@ -37,6 +37,10 @@
 			</dict>
 		</dict>
 	</dict>
+  <key>NSMicrophoneUsageDescription</key>
+	<string></string>
+  <key>NSCameraUsageDescription</key>
+	<string>The app is going to access to your camera or library of your photo in order to allow you to take a photo or for you to upload your photo profile!</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UILaunchStoryboardName</key>
